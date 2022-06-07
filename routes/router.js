@@ -1,7 +1,8 @@
 const express = require("express");
 const mysql = require("mysql");
-// const {v4 : uuidv4} = require('uuid')
-const UUID = require('uuid-int');
+const {v4 : uuidv4} = require('uuid')
+//import { validate as uuidValidate } from 'uuid';
+//const UUID = require('uuid-int');
 
 var mysqlConnection = mysql.createConnection({
   host: "localhost",
@@ -27,8 +28,9 @@ router.get("/", (req, res) => {
 });
 
 router.get("/:id", (req, res) => {
-  const id = parseInt(req.params.id);
-  if (isNaN(id) || id == "#") {
+  const id = req.params.id;
+  const regx = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i ;
+  if (regx.test(id) != true || id == "#") {
     res.send("Invalid id");
   } else {
     mysqlConnection.query(
@@ -47,11 +49,11 @@ router.get("/:id", (req, res) => {
 });
 
 router.post("/create", (req, res) => {
-  const student_id = req.body.student_id ;
+  const student_id = uuidv4() ;
   const fname = req.body.fname;
   const lname = req.body.lname;
   const gender = req.body.gender;
-  const age = UUID(req.body.age);
+  const age = req.body.age;
   const address = req.body.address;
   //let email = req.body.email;
   mysqlConnection.query(
@@ -80,16 +82,17 @@ router.post("/create", (req, res) => {
 });
 
 router.patch("/update/:id", (req, res) => {
-    const student_id = req.body.student_id;
+    //const student_id = req.body.student_id;
     const fname = req.body.fname;
     const lname = req.body.lname;
     const gender = req.body.gender;
     const age = req.body.age;
     const address = req.body.address;
+    const id = req.params.id ;
     //let email = req.body.email;
     mysqlConnection.query(
-        `UPDATE student SET fname = ? ,lname = ? ,gender = ? ,age = ? , address =? WHERE student_id = ?`,
-        [fname, lname, gender, age, address ,req.params.id],
+        "UPDATE student SET fname = ? ,lname = ? ,gender = ? ,age = ? , address =? WHERE student_id = ?",
+        [fname, lname, gender, age, address,id ],
         (err, rows, fields) => {
           if (!err) {
             //console.log(rows);
@@ -112,9 +115,10 @@ router.patch("/update/:id", (req, res) => {
     // );
   });
 
-router.delete("/:id", (req, res) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id) || id == null) {
+router.delete("/delete/:id", (req, res) => {
+    const id = req.params.id;
+    const regx = /^[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i ;
+    if (regx.test(id) !=true ) {
       res.send("Invalid id");
     } else {
       mysqlConnection.query(
@@ -137,7 +141,7 @@ router.delete("/:id", (req, res) => {
         (err, rows, fields) => {
           if (!err) {
             //console.log(rows);
-            console.log("REG DELETED SUCESSFULLY");
+            res.send("REG DELETED SUCESSFULLY");
           } else {
             console.log(err);
           }

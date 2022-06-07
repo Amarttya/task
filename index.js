@@ -32,8 +32,8 @@ app.use('/students/:id' , routes)
 
 app.use('/students/create' ,routes )
 
-app.use('/delete/:id' , routes)
+app.delete('/delete/:id' , routes)
 
-app.use('/update/:id' , routes)
+app.patch('/update/:id' , routes)
 
 app.listen(3000, () => console.log("Express server is running on port : 3000"));
